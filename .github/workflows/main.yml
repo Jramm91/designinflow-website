@@ -1,35 +1,41 @@
-name: Build and Deploy to FTP
-
+name: Build and deploy
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Build ⛏
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
+      - name: Checkout repository
+        uses: actions/checkout@main
       - name: Install dependencies
-        run: npm install
-
-      - name: Build Vite project
+        run: npm ci
+      - name: Build dependencies
         run: npm run build
-
-      - name: Upload dist files to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Archive production artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: dist
+          path: dist
+  deploy:
+    name: Deploy 🚀
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+      - name: Download artifact
+        uses: actions/download-artifact@main
+        with:
+          name: dist
+          path: dist
+      - name: Sync files to hosting
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: dist
-          remote-dir: /public_html
-          include: '*.*'
+          local-dir: ./dist/
