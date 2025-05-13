@@ -1,9 +1,9 @@
 name: 🚀 Build and deploy
-on: 
+on:
   push:
     branches: [main]
   workflow_dispatch:
-    
+
 jobs:
   build:
     name: Build
@@ -17,24 +17,24 @@ jobs:
         run: npm run build
       - name: Archive production artifact
         uses: actions/upload-artifact@main
-        with: 
+        with:
           name: dist
           path: dist
   deploy:
-     name: Deploy
-     needs: build
-     runs-on: ubuntu-latest
-     steps:
-        - name: Check repository
-          uses: actionscheckout@main
-        - name: Download artifact
-          uses: actions/download-artifact@main
-          with:
-            name: dist
-            path: dist
-        - name: Sync files to hosting
-          uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-          with:
-            server: ftp.designinflow.dev
-            username: u467895934.jramm91
-            password: ${{ secrets.ftp_password }}
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check repository
+        uses: actionscheckout@main
+      - name: Download artifact
+        uses: actions/download-artifact@main
+        with:
+          name: dist
+          path: dist
+      - name: Sync files to hosting
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.designinflow.dev
+          username: u467895934.jramm91
+          password: ${{ secrets.ftp_password }}
