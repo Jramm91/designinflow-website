@@ -1,25 +1,40 @@
-name: 🚀 Build and Deploy to FTP
-on: 
+name: Build and deploy
+on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+
 jobs:
   build:
+    name: Build ⛏
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - name: Checkout repository
+        uses: actions/checkout@main
       - name: Install dependencies
-        run: npm install
-
-      - name: Build project
+        run: npm ci
+      - name: Build dependencies
         run: npm run build
-
-      - name: Upload dist to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Archive production artifact
+        uses: actions/upload-artifact@main
         with:
-          server: ftp.designinflow.dev
-          username: u467895934.jramm91
+          name: dist
+          path: dist
+  deploy:
+    name: Deploy 🚀
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@main
+      - name: Download artifact
+        uses: actions/download-artifact@main
+        with:
+          name: dist
+          path: dist
+      - name: Sync files to hosting
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: ${{ secrets.ftp_server }}
+          username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
-          local-dir: dist
