@@ -1,39 +1,15 @@
-name: 🚀 Build and deploy
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
+on: push
+name: 🚀 Deploy website on push
 jobs:
-  build:
-    name: Build
+  web-deploy:
+    name: 🎉 Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Check repository
-        uses: actionscheckout@main
-      - name: Install dependencies
-        run: npm ci
-      - name: Build dependencies
-        run: npm run build
-      - name: Archive production artifact
-        uses: actions/upload-artifact@main
-        with:
-          name: dist
-          path: dist
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check repository
-        uses: actionscheckout@main
-      - name: Download artifact
-        uses: actions/download-artifact@main
-        with:
-          name: dist
-          path: dist
-      - name: Sync files to hosting
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp.designinflow.dev
           username: u467895934.jramm91
